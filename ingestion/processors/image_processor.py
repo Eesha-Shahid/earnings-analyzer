@@ -36,7 +36,7 @@ class ImageProcessor:
 
         try:
             img = Image.open(io.BytesIO(image_bytes))
-            model = genai.GenerativeModel("gemini-1.5-flash")
+            model = genai.GenerativeModel("gemini-2.0-flash")
 
             prompt = (
                 "Analyze this image from a financial document.\n\n"
