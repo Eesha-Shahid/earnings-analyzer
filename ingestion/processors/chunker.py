@@ -13,6 +13,12 @@ SECTION_PATTERNS = {
         r"(gross\s+margin)",
         r"(earnings\s+per\s+share)",
         r"(net\s+income)",
+        r"(gaap)",                          
+        r"(non-gaap)",                      
+        r"(reconciliation)",                
+        r"(condensed\s+consolidated)",      
+        r"(quarterly\s+revenue)",           
+        r"(fiscal\s+(quarter|year).*result)", 
     ],
     "guidance": [
         r"(outlook)",
