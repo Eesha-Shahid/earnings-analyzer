@@ -25,6 +25,16 @@ class IngestionPipeline:
         reported_date = date - timedelta(days=45)
         quarter = f"Q{(reported_date.month - 1) // 3 + 1}"
         return quarter, str(reported_date.year)
+    
+    def _already_ingested(self, doc_id: str) -> bool:
+        try:
+            result = chroma.collection.get(
+                where={"doc_id": {"$eq": doc_id}},
+                limit=1,
+            )
+            return len(result["ids"]) > 0
+        except Exception:
+            return False
 
     def ingest_ticker(self, ticker: str, limit: int = 8):
         print(f"\n{'='*50}")
@@ -35,13 +45,18 @@ class IngestionPipeline:
         company_name = stock.info.get("longName", ticker)
 
         total_chunks = 0
+        all_filing_chunks = []
 
         for filing in transcripts:
-            quarter, year = self._parse_quarter(filing["filing_date"])
             doc_id = self._make_doc_id(
                 ticker, filing["filing_date"], filing["form_type"]
             )
 
+            if self._already_ingested(doc_id):
+                print(f"  ⏭️  Skipping {ticker} {filing['filing_date']} — already ingested")
+                continue
+
+            quarter, year = self._parse_quarter(filing["filing_date"])
             base_metadata = {
                 "ticker": ticker,
                 "company": company_name,
@@ -109,7 +124,7 @@ class IngestionPipeline:
 
             # ── Store everything ────────────────────────────────────
             if all_chunks:
-                chroma.upsert(all_chunks)
+            #     chroma.upsert(all_chunks)
                 total_chunks += len(all_chunks)
                 print(
                     f"  ✅ {ticker} {quarter} {year} — "
@@ -117,6 +132,9 @@ class IngestionPipeline:
                     f"{len(extracted['tables'])} tables, "
                     f"{len(chart_descriptions)} charts"
                 )
+            all_filing_chunks.extend(all_chunks)
 
-        print(f"Done. Total chunks: {total_chunks}")
+        if all_filing_chunks:
+            chroma.upsert(all_filing_chunks)
+            print(f"Done. Upserted {len(all_filing_chunks)} total chunks")
         return total_chunks
