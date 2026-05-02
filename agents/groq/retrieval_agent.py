@@ -20,7 +20,7 @@ from rank_bm25 import BM25Okapi
 from db.chroma import chroma
 from ingestion.processors.embedder import embedder
 from ingestion.fetchers.yfinance_fetcher import YFinanceFetcher
-from agents.query_agent_gemini import QueryPlan
+from agents.groq.query_agent import QueryPlan
 from config import Config
 
 # ─── Output Schemas ────────────────────────────────────────────────────────────

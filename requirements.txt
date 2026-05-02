@@ -25,4 +25,6 @@ sec-edgar-downloader
 finbert-embedding
 rank-bm25
 lxml
+transformers
+torch
 
